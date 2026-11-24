@@ -1,0 +1,36 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.6.9/schema.json",
+    "files": {
+        "includes": [
+            "**",
+            "!skills",
+            "!skills-hub-backup",
+            "!manifest.json",
+            "!**/node_modules",
+            "!**/.git",
+            "!**/coverage",
+            "!**/dist",
+            "!**/package-lock.json",
+            "!**/pnpm-lock.yaml"
+        ]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 100
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "semicolons": "always",
+            "trailingCommas": "es5"
+        }
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "preset": "recommended"
+        }
+    }
+}

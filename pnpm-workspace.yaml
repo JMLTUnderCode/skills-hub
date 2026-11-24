@@ -1,0 +1,7 @@
+packages:
+    - .
+
+minimumReleaseAge: 0
+minimumReleaseAgeExclude:
+    - "@biomejs/biome"
+    - "@biomejs/cli-*"

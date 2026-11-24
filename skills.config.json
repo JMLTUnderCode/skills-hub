@@ -1,0 +1,76 @@
+{
+    "API y Arquitectura": [
+        "api-designer",
+        "architecture-designer",
+        "graphql-architect",
+        "mcp-developer",
+        "microservices-architect",
+        "websocket-engineer"
+    ],
+    "Backend": [
+        "django-expert",
+        "django-storages-s3",
+        "dotnet-core-expert",
+        "fastapi-expert",
+        "laravel-specialist",
+        "nestjs-expert",
+        "rails-expert",
+        "spring-boot-engineer"
+    ],
+    "Calidad": [
+        "code-documenter",
+        "code-reviewer",
+        "debugging-wizard",
+        "playwright-expert",
+        "test-master"
+    ],
+    "Data y ML": [
+        "fine-tuning-expert",
+        "ml-pipeline",
+        "pandas-pro",
+        "prompt-engineer",
+        "rag-architect",
+        "spark-engineer"
+    ],
+    "DevOps": [
+        "chaos-engineer",
+        "cli-developer",
+        "devops-engineer",
+        "monitoring-expert",
+        "sre-engineer"
+    ],
+    "Especializado": ["embedded-systems", "game-developer", "legacy-modernizer"],
+    "Frontend": [
+        "angular-architect",
+        "flutter-expert",
+        "nextjs-developer",
+        "react-expert",
+        "react-native-expert",
+        "vue-expert",
+        "vue-expert-js"
+    ],
+    "Infraestructura": [
+        "cloud-architect",
+        "database-optimizer",
+        "kubernetes-specialist",
+        "postgres-pro",
+        "terraform-engineer"
+    ],
+    "Lenguajes": [
+        "cpp-pro",
+        "csharp-developer",
+        "golang-pro",
+        "java-architect",
+        "javascript-pro",
+        "kotlin-specialist",
+        "php-pro",
+        "python-pro",
+        "rust-engineer",
+        "sql-pro",
+        "swift-expert",
+        "typescript-pro"
+    ],
+    "Plataformas": ["atlassian-mcp", "salesforce-developer", "shopify-expert", "wordpress-pro"],
+    "Seguridad": ["fullstack-guardian", "secure-code-guardian", "security-reviewer"],
+    "Workflow": ["feature-forge", "spec-miner", "the-fool"]
+}
