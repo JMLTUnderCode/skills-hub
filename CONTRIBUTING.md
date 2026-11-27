@@ -77,3 +77,11 @@ Notas:
 - [ ] La skill está asignada en `skills.config.json` si corresponde.
 - [ ] `pnpm run check` y `pnpm run test` pasan.
 - [ ] `pnpm run build:manifest` no genera cambios inesperados.
+
+## Sincronización con upstream
+
+Las skills comunes con [Jeffallan/claude-skills](https://github.com/Jeffallan/claude-skills/tree/main/plugin/skills) pueden actualizarse automáticamente mediante el workflow `Sync upstream skills`.
+
+- Las skills nuevas detectadas se agregan a `skills.config.json` en la categoría `Por asignar`; revisa y reasigna la categoría en el PR `sync-skills`.
+- Las skills eliminadas en upstream no se eliminan localmente; se reportan en el PR para revisión manual.
+- Si necesitas preservar cambios locales en una skill común, agrega su ID en `sync.ignore`.

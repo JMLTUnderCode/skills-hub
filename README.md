@@ -105,6 +105,46 @@ pnpm test
 
 El workflow `Build manifest` se ejecuta en push a `main` cuando cambian `skills/**` o `skills.config.json`, y también por `workflow_dispatch`. Regenera `manifest.json` y, si hay cambios, crea un commit automático `chore: regenerate manifest.json`.
 
+## Sincronización con upstream
+
+El repositorio sincroniza skills desde [Jeffallan/claude-skills](https://github.com/Jeffallan/claude-skills/tree/main/plugin/skills) mediante `.github/workflows/sync-upstream-skills.yml`.
+
+- Frecuencia: cron diario y ejecución manual (`workflow_dispatch`).
+- Detección: compara el SHA del último commit upstream en `plugin/skills` con `.github/upstream-sync-state.json`.
+- Si no hay cambios, no crea PR.
+- Si hay cambios, crea o actualiza un PR desde la rama `sync-skills` hacia `main`.
+
+### Reglas de sincronización
+
+| Caso                                | Acción                                                                            |
+| ----------------------------------- | --------------------------------------------------------------------------------- |
+| Skill nueva en upstream             | Se copia a `skills/<id>/` y se agrega en `skills.config.json` bajo `Por asignar`. |
+| Skill común con cambios en upstream | Se actualiza con la versión upstream.                                             |
+| Skill eliminada en upstream         | No se elimina localmente; se reporta en el PR.                                    |
+| Skill solo local                    | Se conserva.                                                                      |
+| Skill listada en `sync.ignore`      | Se omite durante la sincronización.                                               |
+
+### Protección de cambios locales
+
+Para evitar que una skill común sea sobrescrita por upstream, agrega su ID en `sync.ignore`:
+
+```text
+python-pro
+```
+
+### Ejecución local
+
+```bash
+pnpm run sync:upstream:dry
+pnpm run sync:upstream
+```
+
 ## Licencia
 
 MIT. Ver [LICENSE](LICENSE).
+
+## Referencias
+
+- [1] J. Allan, "claude-skills," GitHub. [Online]. Available: https://github.com/Jeffallan/claude-skills. [Accessed: 26-Nov-2026].
+- [2] GitHub, "Events that trigger workflows," GitHub Docs. [Online]. Available: https://docs.github.com/actions/using-workflows/events-that-trigger-workflows. [Accessed: 26-Nov-2026].
+- [3] GitHub, "REST API endpoints for commits," GitHub Docs. [Online]. Available: https://docs.github.com/rest/commits/commits. [Accessed: 26-Nov-2026].
