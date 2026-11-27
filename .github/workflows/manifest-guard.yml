@@ -1,4 +1,4 @@
-name: Build manifest
+name: Manifest guard
 
 on:
     push:
@@ -13,7 +13,7 @@ permissions:
     contents: write
 
 jobs:
-    build:
+    guard:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
@@ -24,13 +24,13 @@ jobs:
               with:
                   node-version: "20"
 
-            - name: Build manifest
+            - name: Regenerar manifest
               run: node scripts/build-manifest.mjs
 
-            - name: Commit manifest if changed
+            - name: Confirmar manifest o commitear corrección
               run: |
                   if git diff --quiet -- manifest.json; then
-                    echo "manifest.json sin cambios"
+                    echo "manifest.json en línea"
                     exit 0
                   fi
                   git config user.name "github-actions[bot]"

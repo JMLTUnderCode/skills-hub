@@ -58,16 +58,26 @@ Asigna la skill en `skills.config.json`:
 Antes de abrir PR o hacer push, ejecuta:
 
 ```bash
+pnpm run validate
+```
+
+`validate` ejecuta `pnpm install`, regenera `manifest.json`, corre `pnpm run check`, corre `pnpm run test` y emite un mensaje final solo si todo está operativo para commit/merge del PR por la web.
+
+Comandos individuales útiles:
+
+```bash
 pnpm install
+pnpm run build:manifest
+pnpm run check:manifest
 pnpm run check
 pnpm run test
-pnpm run build:manifest
 ```
 
 Notas:
 
 - No edites `manifest.json` manualmente.
-- Si tu cambio afecta `skills/**` o `skills.config.json`, el workflow `Build manifest` puede regenerar y commitear `manifest.json` en `main`.
+- Si tu cambio afecta `skills/**` o `skills.config.json`, regenera el manifest antes de commitear en la rama/PR. El workflow `Manifest guard` en `main` es una red de seguridad: si detecta disparidad, regenera y commitea `manifest.json`; si está en línea, no hace nada.
+- `check:manifest` y el test de paridad del repositorio ignoran el campo `generated`; validan que `manifest.json` esté en línea con `skills/` y `skills.config.json`.
 - `biome.json` excluye `skills/` y `manifest.json`; los cambios en skills deben revisarse por contenido y consistencia.
 
 ## Checklist

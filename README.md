@@ -12,7 +12,7 @@ Repositorio relacionado: [agent-skills-template](https://github.com/JMLTUnderCod
 - `manifest.json`: índice generado; no editar manualmente.
 - `scripts/build-manifest.mjs`: generador del manifest.
 - `tests/build-manifest.test.mjs`: pruebas del generador.
-- `.github/workflows/build-manifest.yml`: regeneración automática en `main`.
+- `.github/workflows/manifest-guard.yml`: guardia que verifica/regenera el manifest en `main`.
 
 ## Contrato de `manifest.json`
 
@@ -96,14 +96,18 @@ Requisitos: Node.js >= 18 y pnpm.
 ```bash
 pnpm install
 pnpm run build:manifest
+pnpm run check:manifest
 pnpm run check
 pnpm run check:fix
 pnpm test
+pnpm run validate
 ```
+
+`pnpm run validate` ejecuta install, build de manifest, check, tests y confirma si el árbol está listo para commit/merge del PR por la web.
 
 ## CI
 
-El workflow `Build manifest` se ejecuta en push a `main` cuando cambian `skills/**` o `skills.config.json`, y también por `workflow_dispatch`. Regenera `manifest.json` y, si hay cambios, crea un commit automático `chore: regenerate manifest.json`.
+El workflow `Manifest guard` se ejecuta en push a `main` cuando cambian `skills/**` o `skills.config.json`, y también por `workflow_dispatch`. Actúa como guardia: regenera `manifest.json`, verifica si hay diferencias y, solo si detecta disparidad, crea un commit automático `chore: regenerate manifest.json`; si ya está en línea, no hace nada. En ramas/PRs como `sync-skills`, regenera el manifest localmente con `pnpm run build:manifest` o usa `pnpm run validate` antes de commitear.
 
 ## Sincronización con upstream
 
