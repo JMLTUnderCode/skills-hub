@@ -13,23 +13,23 @@ jobs:
     sync:
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout
+            - name: Checkout del repositorio
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
-            - name: Setup Node
+            - name: Configurar Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: "20"
 
-            - name: Setup pnpm
+            - name: Configurar pnpm
               uses: pnpm/action-setup@v4
 
-            - name: Install dependencies
+            - name: Instalar dependencias
               run: pnpm install --frozen-lockfile
 
-            - name: Detect upstream changes
+            - name: Detectar cambios en upstream
               id: detect
               env:
                   GH_TOKEN: ${{ github.token }}
@@ -48,31 +48,41 @@ jobs:
                     echo "Cambios detectados: $LAST_SHA -> $UPSTREAM_SHA"
                   fi
 
-            - name: Sync upstream skills
+            - name: Sincronizar skills desde upstream
               id: sync
               if: steps.detect.outputs.changed == 'true'
               env:
                   GH_TOKEN: ${{ github.token }}
+                  SUMMARY_FILE: ${{ runner.temp }}/sync-summary.json
               run: |
                   set -euo pipefail
-                  node scripts/sync-upstream-skills.mjs --json > sync-summary.json
-                  cat sync-summary.json
-                  node --input-type=commonjs -e "const fs=require('fs');const s=JSON.parse(fs.readFileSync('sync-summary.json','utf8'));const out=['changed='+s.changed,'added='+s.added.length,'updated='+s.updated.length,'removed='+s.removedUpstream.length].join(String.fromCharCode(10))+String.fromCharCode(10);fs.appendFileSync(process.env.GITHUB_OUTPUT,out);"
+                  node scripts/sync-upstream-skills.mjs --json > "$SUMMARY_FILE"
+                  cat "$SUMMARY_FILE"
+                  node --input-type=commonjs -e "const fs=require('fs');const p=process.env.SUMMARY_FILE;const s=JSON.parse(fs.readFileSync(p,'utf8'));const out=['changed='+s.changed,'added='+s.added.length,'updated='+s.updated.length,'removed='+s.removedUpstream.length].join(String.fromCharCode(10))+String.fromCharCode(10);fs.appendFileSync(process.env.GITHUB_OUTPUT,out);"
 
-            - name: Run checks
+            - name: Normalizar formato de archivos generados
+              if: steps.sync.outputs.changed == 'true'
+              run: |
+                  pnpm exec biome check --write skills.config.json manifest.json .github/upstream-sync-state.json
+
+            - name: Ejecutar validaciones de formato y pruebas
               if: steps.sync.outputs.changed == 'true'
               run: |
                   pnpm run check
                   pnpm run test
 
-            - name: Build PR body
+            - name: Construir cuerpo del pull request
               if: steps.sync.outputs.changed == 'true'
               id: body
+              env:
+                  SUMMARY_FILE: ${{ runner.temp }}/sync-summary.json
+                  PR_BODY_FILE: ${{ runner.temp }}/pr-body.md
               run: |
-                  node <<'NODE' > pr-body.md
+                  node --input-type=commonjs - "$SUMMARY_FILE" "$PR_BODY_FILE" <<'NODE'
                   const fs = require('fs');
-                  const s = JSON.parse(fs.readFileSync('sync-summary.json', 'utf8'));
-                  const fmt = (arr) => arr.length ? arr.map((x) => `- \`${x}\``).join('\n') : '- Ninguna';
+                  const [summaryFile, bodyFile] = process.argv.slice(2);
+                  const s = JSON.parse(fs.readFileSync(summaryFile, 'utf8'));
+                  const fmt = (arr) => (arr.length ? arr.map((x) => `- \`${x}\``).join('\n') : '- Ninguna');
                   const body = [
                     '## Sincronización automática de skills desde upstream',
                     '',
@@ -93,11 +103,11 @@ jobs:
                     '',
                     'Revisa la categoría `Por asignar` en `skills.config.json` antes de fusionar.',
                   ].join('\n');
-                  fs.writeFileSync('pr-body.md', body);
+                  fs.writeFileSync(bodyFile, body);
+                  console.log(body);
                   NODE
-                  cat pr-body.md
 
-            - name: Create or update pull request
+            - name: Crear o actualizar pull request de sincronización
               if: steps.sync.outputs.changed == 'true'
               uses: peter-evans/create-pull-request@v6
               with:
@@ -105,7 +115,7 @@ jobs:
                   branch: sync-skills
                   base: main
                   title: "chore(sync): sincronizar skills desde upstream"
-                  body-path: pr-body.md
+                  body-path: ${{ runner.temp }}/pr-body.md
                   commit-message: "chore(sync): sincronizar skills desde upstream"
                   add-paths: |
                       skills/**
