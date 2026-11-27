@@ -1,0 +1,3 @@
+# IDs de skills a ignorar durante la sincronización desde upstream.
+# Una entrada por línea. Las líneas vacías y las que inician con # se ignoran.
+# Usa este archivo para preservar cambios locales en skills comunes con upstream.

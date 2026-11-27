@@ -5,6 +5,8 @@
     "type": "module",
     "scripts": {
         "build:manifest": "node scripts/build-manifest.mjs",
+        "sync:upstream": "node scripts/sync-upstream-skills.mjs",
+        "sync:upstream:dry": "node scripts/sync-upstream-skills.mjs --dry-run --json",
         "check": "biome check .",
         "check:fix": "biome check --write .",
         "test": "node --test --experimental-test-module-mocks \"tests/**/*.test.mjs\""

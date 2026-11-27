@@ -1,0 +1,9 @@
+{
+    "source": {
+        "repository": "Jeffallan/claude-skills",
+        "ref": "main",
+        "path": "plugin/skills"
+    },
+    "lastSyncedSha": "",
+    "lastSyncedAt": ""
+}

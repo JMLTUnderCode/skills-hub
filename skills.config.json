@@ -72,5 +72,6 @@
     ],
     "Plataformas": ["atlassian-mcp", "salesforce-developer", "shopify-expert", "wordpress-pro"],
     "Seguridad": ["fullstack-guardian", "secure-code-guardian", "security-reviewer"],
-    "Workflow": ["feature-forge", "spec-miner", "the-fool"]
+    "Workflow": ["feature-forge", "spec-miner", "the-fool"],
+    "Por asignar": []
 }
