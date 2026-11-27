@@ -5,11 +5,13 @@
     "type": "module",
     "scripts": {
         "build:manifest": "node scripts/build-manifest.mjs",
+        "check:manifest": "node scripts/build-manifest.mjs --check",
         "sync:upstream": "node scripts/sync-upstream-skills.mjs",
         "sync:upstream:dry": "node scripts/sync-upstream-skills.mjs --dry-run --json",
         "check": "biome check .",
         "check:fix": "biome check --write .",
-        "test": "node --test --experimental-test-module-mocks tests"
+        "test": "node --test --experimental-test-module-mocks tests",
+        "validate": "node scripts/validate.mjs"
     },
     "engines": {
         "node": ">=18"

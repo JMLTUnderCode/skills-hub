@@ -7,7 +7,9 @@ import test from 'node:test';
 import {
     buildCategoryIndex,
     buildManifest,
+    checkManifest,
     loadSkills,
+    normalizeManifestForComparison,
     parseFrontmatter,
     runBuildManifest,
 } from '../scripts/build-manifest.mjs';
@@ -152,4 +154,63 @@ test('runBuildManifest falla si no existe el directorio de skills', async () => 
     } finally {
         await fs.rm(baseDir, { recursive: true, force: true });
     }
+});
+
+test('normalizeManifestForComparison ignora generated', () => {
+    // La fecha de generación no debe afectar la paridad lógica del manifest.
+    const normalized = normalizeManifestForComparison({
+        version: 1,
+        generated: '2026-01-01T00:00:00.000Z',
+        skills: [],
+    });
+    assert.deepEqual(normalized, { version: 1, skills: [] });
+});
+
+test('checkManifest reporta paridad cuando manifest está en línea', async () => {
+    // Verifica el modo guardia en un entorno controlado.
+    const baseDir = await createTempDir('build-manifest-check-ok-');
+    const skillsDir = path.join(baseDir, 'skills');
+    const configFile = path.join(baseDir, 'skills.config.json');
+    const manifestFile = path.join(baseDir, 'manifest.json');
+    await fs.mkdir(skillsDir, { recursive: true });
+    await writeSkill(skillsDir, 'python-pro', 'name: python-pro\ndescription: Python');
+    await fs.writeFile(configFile, JSON.stringify({ Lenguajes: ['python-pro'] }, null, 4));
+
+    try {
+        runBuildManifest({ skillsDirectory: skillsDir, configFile, manifestFile });
+        const result = checkManifest({ skillsDirectory: skillsDir, configFile, manifestFile });
+        assert.equal(result.ok, true);
+        assert.equal(result.reason, 'in-sync');
+    } finally {
+        await fs.rm(baseDir, { recursive: true, force: true });
+    }
+});
+
+test('checkManifest falla cuando manifest está fuera de línea', async () => {
+    // Detecta disparidad de categorías/contenido sin considerar generated.
+    const baseDir = await createTempDir('build-manifest-check-bad-');
+    const skillsDir = path.join(baseDir, 'skills');
+    const configFile = path.join(baseDir, 'skills.config.json');
+    const manifestFile = path.join(baseDir, 'manifest.json');
+    await fs.mkdir(skillsDir, { recursive: true });
+    await writeSkill(skillsDir, 'python-pro', 'name: python-pro\ndescription: Python');
+    await fs.writeFile(configFile, JSON.stringify({ Lenguajes: ['python-pro'] }, null, 4));
+
+    try {
+        runBuildManifest({ skillsDirectory: skillsDir, configFile, manifestFile });
+        const manifest = JSON.parse(await fs.readFile(manifestFile, 'utf8'));
+        manifest.skills[0].category = 'Otra';
+        await fs.writeFile(manifestFile, `${JSON.stringify(manifest, null, 4)}\n`);
+        const result = checkManifest({ skillsDirectory: skillsDir, configFile, manifestFile });
+        assert.equal(result.ok, false);
+        assert.equal(result.reason, 'out-of-sync');
+    } finally {
+        await fs.rm(baseDir, { recursive: true, force: true });
+    }
+});
+
+test('checkManifest valida paridad del repositorio real', () => {
+    // Garantiza que skills.config.json y manifest.json estén en línea antes de merge.
+    const result = checkManifest();
+    assert.equal(result.ok, true, result.reason);
 });
