@@ -4,7 +4,6 @@
         "includes": [
             "**",
             "!skills",
-            "!skills-hub-backup",
             "!manifest.json",
             "!**/node_modules",
             "!**/.git",
