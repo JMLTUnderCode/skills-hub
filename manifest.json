@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "generated": "2026-11-27T03:50:17.659Z",
+    "generated": "2026-11-27T20:41:46.215Z",
     "skills": [
         {
             "id": "api-designer",
@@ -233,7 +233,7 @@
         {
             "id": "vue-expert",
             "name": "vue-expert",
-            "description": "Builds Vue 3 components with Composition API patterns, configures Nuxt 3 SSR/SSG projects, sets up Pinia stores, scaffolds Quasar/Capacitor mobile apps, implements PWA features, and optimises Vite builds. Use when creating Vue 3 applications with Composition API, writing reusable composables, managing state with Pinia, building hybrid mobile apps with Quasar or Capacitor, configuring service workers, or tuning Vite configuration and TypeScript integration.",
+            "description": "Builds Vue 3 components with Composition API patterns, renders Vue on the server without Nuxt, sets up Pinia stores, scaffolds Quasar/Capacitor mobile apps, implements PWA features, and optimises Vite builds. Use when creating Vue 3 applications with Composition API, writing reusable composables, managing state with Pinia, building hybrid mobile apps with Quasar or Capacitor, configuring service workers, or tuning Vite configuration and TypeScript integration. For Nuxt projects, use nuxt-expert.",
             "category": "Frontend"
         },
         {
@@ -367,6 +367,30 @@
             "name": "wordpress-pro",
             "description": "Develops custom WordPress themes and plugins, creates and registers Gutenberg blocks and block patterns, configures WooCommerce stores, implements WordPress REST API endpoints, applies security hardening (nonces, sanitization, escaping, capability checks), and optimizes performance through caching and query tuning. Use when building WordPress themes, writing plugins, customizing Gutenberg blocks, extending WooCommerce, working with ACF, using the WordPress REST API, applying hooks and filters, or improving WordPress performance and security.",
             "category": "Plataformas"
+        },
+        {
+            "id": "firebase-expert",
+            "name": "firebase-expert",
+            "description": "Builds, secures and reviews Firebase apps with the modular JS SDK (firebase 13), firebase-admin 14 and Cloud Functions 2nd gen: Firestore data modeling, queries, indexes, transactions and offline cache, Firestore and Storage Security Rules with emulator tests, Firebase Authentication and Identity Platform (custom claims, session cookies, blocking functions), callable and event-triggered functions with secrets, App Check, Firebase Hosting and App Hosting deploys, and Firestore cost control. Use when code imports from firebase/*, firebase-admin or firebase-functions, when editing firestore.rules, storage.rules, firestore.indexes.json, firebase.json or apphosting.yaml, when choosing between Firestore, Realtime Database and SQL Connect, or when diagnosing permission-denied errors, missing-index errors, runaway read costs or functions that loop on their own writes. Not for Supabase, AWS Amplify or plain Google Cloud projects with no Firebase.",
+            "category": "Por asignar"
+        },
+        {
+            "id": "flask-expert",
+            "name": "flask-expert",
+            "description": "Builds, modernizes and audits Flask 3.x applications: application factories and blueprints, Flask-SQLAlchemy 3.1 with SQLAlchemy 2.x typed models and Flask-Migrate, JSON APIs validated with Pydantic or marshmallow and JSON errors, Jinja templates with Flask-WTF CSRF, Flask-Login and Flask-JWT-Extended auth, pytest fixtures over the factory, and gunicorn or waitress deployment with Celery, RQ or APScheduler jobs. Use when code imports from flask or flask_* extensions (create_app, Blueprint, app.route, flask_sqlalchemy, flask_login, flask_wtf), when adding login, an API endpoint, forms, tests, background jobs or production deployment to a Flask app, when reviewing or upgrading an existing Flask project, or when diagnosing Flask errors such as 'Working outside of application context' or a 500 that only appears under gunicorn. Not for Django or FastAPI projects.",
+            "category": "Por asignar"
+        },
+        {
+            "id": "nuxt-expert",
+            "name": "nuxt-expert",
+            "description": "Builds, upgrades and reviews Nuxt 4 full-stack applications: the app/ directory layout, SSR-safe data fetching with useFetch, useAsyncData and $fetch, Nitro server routes with nuxt/server handlers, runtime config and server-only secrets, hybrid rendering with route rules (SSR, SSG, SWR, ISR), server components and islands, lazy hydration, nuxt-security and nuxt-auth-utils, deployment presets for Node, Vercel, Netlify and Cloudflare, and tests with @nuxt/test-utils and Vitest. Use when working in a project with nuxt.config.ts or a nuxt dependency, when adding pages, server API routes, auth, caching or deployment to a Nuxt app, when migrating Nuxt 3 to 4 or preparing for Nuxt 5, or when diagnosing hydration mismatches, double fetching or NUXT_E error codes. Not for plain Vue SPAs without Nuxt or for Next.js projects.",
+            "category": "Por asignar"
+        },
+        {
+            "id": "ticket-guard",
+            "name": "ticket-guard",
+            "description": "Guards one workflow ticket with marker-scoped hooks that freeze its RED tests, re-run GREEN before a goal-mode stop, and restore the ticket's context after compaction. Use when ticket:execute starts or resumes a ticket, or when a session must pick a ticket back up after compaction.",
+            "category": "Por asignar"
         },
         {
             "id": "fullstack-guardian",
