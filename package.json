@@ -9,7 +9,7 @@
         "sync:upstream:dry": "node scripts/sync-upstream-skills.mjs --dry-run --json",
         "check": "biome check .",
         "check:fix": "biome check --write .",
-        "test": "node --test --experimental-test-module-mocks \"tests/**/*.test.mjs\""
+        "test": "node --test --experimental-test-module-mocks tests"
     },
     "engines": {
         "node": ">=18"
