@@ -1,0 +1,30 @@
+name: Manifest guard
+
+on:
+    pull_request:
+        branches:
+            - main
+        paths:
+            - "skills/**"
+            - "skills.config.json"
+            - "manifest.json"
+            - "scripts/build-manifest.mjs"
+            - ".github/workflows/manifest-guard.yml"
+
+permissions:
+    contents: read
+
+jobs:
+    guard:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Verificar paridad del manifest
+              run: node scripts/build-manifest.mjs --check

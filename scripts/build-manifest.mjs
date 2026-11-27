@@ -144,19 +144,28 @@ export function buildManifest(skills, generatedAt = new Date().toISOString()) {
 }
 
 /**
- * Descripción: Ejecuta la generación del manifest leyendo configuración y skills del repositorio.
+ * Descripción: Normaliza un manifest para comparación, ignorando campos volátiles.
+ * Args:
+ *    - manifest: (Obligatorio) Objeto manifest a normalizar.
+ * Returns:
+ *    Objeto manifest normalizado sin la fecha de generación.
+ */
+export function normalizeManifestForComparison(manifest) {
+    // Ignora generated porque cambia en cada ejecución y no representa paridad lógica.
+    const { generated: _generated, ...comparable } = manifest || {};
+    return comparable;
+}
+
+/**
+ * Descripción: Construye el manifest esperado desde disco sin escribir archivos.
  * Args:
  *    - options: (Opcional) Rutas personalizadas para pruebas o ejecución controlada.
- *        - skillsDirectory: Ruta del directorio de skills.
- *        - configFile: Ruta del archivo skills.config.json.
- *        - manifestFile: Ruta de salida del manifest.json.
  * Returns:
- *    Objeto con el manifest generado y la cantidad de skills.
+ *    Objeto con el manifest esperado y la cantidad de skills.
  */
-export function runBuildManifest(options = {}) {
+export function buildExpectedManifest(options = {}) {
     const currentSkillsDir = options.skillsDirectory || skillsDir;
     const currentConfigPath = options.configFile || configPath;
-    const currentManifestPath = options.manifestFile || manifestPath;
 
     // Verifica prerequisitos antes de procesar.
     if (!fs.existsSync(currentSkillsDir)) {
@@ -169,17 +178,109 @@ export function runBuildManifest(options = {}) {
         : {};
     const categoryIndex = buildCategoryIndex(config);
     const skills = loadSkills(currentSkillsDir, categoryIndex);
-    const manifest = buildManifest(skills, options.generatedAt);
+    const manifest = buildManifest(skills, options.generatedAt || '1970-01-01T00:00:00.000Z');
+
+    return { manifest, count: skills.length };
+}
+
+/**
+ * Descripción: Verifica que manifest.json esté en línea con skills y skills.config.json.
+ * Args:
+ *    - options: (Opcional) Rutas personalizadas para pruebas o ejecución controlada.
+ * Returns:
+ *    Objeto con el resultado de la verificación y detalles de paridad.
+ */
+export function checkManifest(options = {}) {
+    const currentManifestPath = options.manifestFile || manifestPath;
+    const expected = buildExpectedManifest(options);
+
+    // Reporta ausencia del manifest como disparidad explícita.
+    if (!fs.existsSync(currentManifestPath)) {
+        return {
+            ok: false,
+            count: expected.count,
+            manifestFile: currentManifestPath,
+            reason: 'missing-manifest',
+        };
+    }
+
+    const currentManifest = JSON.parse(fs.readFileSync(currentManifestPath, 'utf8'));
+    const expectedComparable = normalizeManifestForComparison(expected.manifest);
+    const currentComparable = normalizeManifestForComparison(currentManifest);
+    const ok = JSON.stringify(currentComparable) === JSON.stringify(expectedComparable);
+
+    return {
+        ok,
+        count: expected.count,
+        manifestFile: currentManifestPath,
+        reason: ok ? 'in-sync' : 'out-of-sync',
+    };
+}
+
+/**
+ * Descripción: Ejecuta la generación del manifest leyendo configuración y skills del repositorio.
+ * Args:
+ *    - options: (Opcional) Rutas personalizadas para pruebas o ejecución controlada.
+ *        - skillsDirectory: Ruta del directorio de skills.
+ *        - configFile: Ruta del archivo skills.config.json.
+ *        - manifestFile: Ruta de salida del manifest.json.
+ * Returns:
+ *    Objeto con el manifest generado y la cantidad de skills.
+ */
+export function runBuildManifest(options = {}) {
+    const currentManifestPath = options.manifestFile || manifestPath;
+    const expected = buildExpectedManifest(options);
+    const manifest = buildManifest(expected.manifest.skills, options.generatedAt);
 
     // Escribe el manifest con formato estable para control de versiones.
     fs.writeFileSync(currentManifestPath, `${JSON.stringify(manifest, null, 4)}\n`);
-    return { manifest, count: skills.length };
+    return { manifest, count: expected.count };
+}
+
+/**
+ * Descripción: Parsea argumentos CLI del generador/verificador de manifest.
+ * Args:
+ *    - argv: (Obligatorio) Lista de argumentos de proceso.
+ * Returns:
+ *    Objeto con flags soportadas.
+ */
+export function parseArgs(argv) {
+    // Mantiene el parser simple porque el script solo requiere modo verificación.
+    return {
+        check: argv.includes('--check'),
+    };
+}
+
+/**
+ * Descripción: Ejecuta el CLI de manifest en modo generación o verificación.
+ * Args:
+ *    - argv: (Opcional) Argumentos CLI.
+ * Returns:
+ *    Objeto con el resultado de la ejecución.
+ */
+export function runCli(argv = process.argv.slice(2)) {
+    const args = parseArgs(argv);
+    if (args.check) {
+        const result = checkManifest();
+        if (!result.ok) {
+            console.error(
+                `Manifest fuera de línea: ${result.manifestFile}. Ejecuta pnpm run build:manifest.`
+            );
+            process.exitCode = 1;
+            return result;
+        }
+        console.log(`Manifest en línea: ${result.count} skills`);
+        return result;
+    }
+
+    const result = runBuildManifest();
+    console.log(`Manifest generado: ${result.count} skills`);
+    return result;
 }
 
 // Ejecuta el script solo cuando se invoca directamente desde CLI.
 const isDirectExecution =
     process.argv[1] && path.resolve(process.argv[1]) === path.resolve(__filename);
 if (isDirectExecution) {
-    const result = runBuildManifest();
-    console.log(`Manifest generado: ${result.count} skills`);
+    runCli();
 }

@@ -12,6 +12,7 @@
         "django-storages-s3",
         "dotnet-core-expert",
         "fastapi-expert",
+        "flask-expert",
         "laravel-specialist",
         "nestjs-expert",
         "rails-expert",
@@ -44,6 +45,7 @@
         "angular-architect",
         "flutter-expert",
         "nextjs-developer",
+        "nuxt-expert",
         "react-expert",
         "react-native-expert",
         "vue-expert",
@@ -70,8 +72,13 @@
         "swift-expert",
         "typescript-pro"
     ],
-    "Plataformas": ["atlassian-mcp", "salesforce-developer", "shopify-expert", "wordpress-pro"],
+    "Plataformas": [
+        "atlassian-mcp",
+        "firebase-expert",
+        "salesforce-developer",
+        "shopify-expert",
+        "wordpress-pro"
+    ],
     "Seguridad": ["fullstack-guardian", "secure-code-guardian", "security-reviewer"],
-    "Workflow": ["feature-forge", "spec-miner", "the-fool"],
-    "Por asignar": []
+    "Workflow": ["feature-forge", "spec-miner", "the-fool", "ticket-guard"]
 }
