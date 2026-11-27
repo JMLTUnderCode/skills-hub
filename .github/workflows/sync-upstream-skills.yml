@@ -57,10 +57,7 @@ jobs:
                   set -euo pipefail
                   node scripts/sync-upstream-skills.mjs --json > sync-summary.json
                   cat sync-summary.json
-                  echo "changed=$(node -e \"const s=require('./sync-summary.json');process.stdout.write(String(s.changed))\")" >> "$GITHUB_OUTPUT"
-                  echo "added=$(node -e \"const s=require('./sync-summary.json');process.stdout.write(String(s.added.length))\")" >> "$GITHUB_OUTPUT"
-                  echo "updated=$(node -e \"const s=require('./sync-summary.json');process.stdout.write(String(s.updated.length))\")" >> "$GITHUB_OUTPUT"
-                  echo "removed=$(node -e \"const s=require('./sync-summary.json');process.stdout.write(String(s.removedUpstream.length))\")" >> "$GITHUB_OUTPUT"
+                  node --input-type=commonjs -e "const fs=require('fs');const s=JSON.parse(fs.readFileSync('sync-summary.json','utf8'));const out=['changed='+s.changed,'added='+s.added.length,'updated='+s.updated.length,'removed='+s.removedUpstream.length].join(String.fromCharCode(10))+String.fromCharCode(10);fs.appendFileSync(process.env.GITHUB_OUTPUT,out);"
 
             - name: Run checks
               if: steps.sync.outputs.changed == 'true'
