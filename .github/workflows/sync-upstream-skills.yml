@@ -52,6 +52,7 @@ jobs:
               id: sync
               if: steps.detect.outputs.changed == 'true'
               env:
+                  GITHUB_TOKEN: ${{ github.token }}
                   GH_TOKEN: ${{ github.token }}
                   SUMMARY_FILE: ${{ runner.temp }}/sync-summary.json
               run: |

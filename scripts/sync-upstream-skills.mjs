@@ -98,14 +98,27 @@ export async function getUpstreamSha(source, fetcher = fetch) {
     url.searchParams.set('path', source.path);
     url.searchParams.set('per_page', '1');
 
-    const response = await fetcher(url, {
-        headers: {
-            Accept: 'application/vnd.github+json',
-            'User-Agent': 'skills-hub-sync',
-        },
-    });
+    const headers = {
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'skills-hub-sync',
+    };
+    // Usa token si está disponible para evitar límites bajos de peticiones anónimas.
+    const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetcher(url, { headers });
     if (!response.ok) {
-        throw new Error(`No se pudo consultar upstream: ${response.status} ${response.statusText}`);
+        const remaining = response.headers.get('x-ratelimit-remaining');
+        const reset = response.headers.get('x-ratelimit-reset');
+        const resetInfo =
+            remaining === '0' && reset
+                ? `; rate limit reinicia en ${new Date(Number(reset) * 1000).toISOString()}`
+                : '';
+        throw new Error(
+            `No se pudo consultar upstream: ${response.status} ${response.statusText}${resetInfo}`
+        );
     }
     const commits = await response.json();
     if (!Array.isArray(commits) || commits.length === 0 || !commits[0]?.sha) {
