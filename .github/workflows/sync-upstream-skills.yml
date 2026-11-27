@@ -1,0 +1,117 @@
+name: Sync upstream skills
+
+on:
+    schedule:
+        - cron: "17 6 * * *"
+    workflow_dispatch:
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    sync:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Detect upstream changes
+              id: detect
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  set -euo pipefail
+                  STATE_FILE=".github/upstream-sync-state.json"
+                  LAST_SHA=$(node -e "const fs=require('fs');const p='$STATE_FILE';if(!fs.existsSync(p)){process.stdout.write('');process.exit(0);}const j=JSON.parse(fs.readFileSync(p,'utf8'));process.stdout.write(j.lastSyncedSha||'');")
+                  UPSTREAM_SHA=$(gh api repos/Jeffallan/claude-skills/commits -f sha=main -f path=plugin/skills -F per_page=1 --jq '.[0].sha')
+                  echo "last_sha=$LAST_SHA" >> "$GITHUB_OUTPUT"
+                  echo "upstream_sha=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
+                  if [ -n "$LAST_SHA" ] && [ "$LAST_SHA" = "$UPSTREAM_SHA" ]; then
+                    echo "changed=false" >> "$GITHUB_OUTPUT"
+                    echo "Sin cambios upstream en plugin/skills"
+                  else
+                    echo "changed=true" >> "$GITHUB_OUTPUT"
+                    echo "Cambios detectados: $LAST_SHA -> $UPSTREAM_SHA"
+                  fi
+
+            - name: Sync upstream skills
+              id: sync
+              if: steps.detect.outputs.changed == 'true'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  set -euo pipefail
+                  node scripts/sync-upstream-skills.mjs --json > sync-summary.json
+                  cat sync-summary.json
+                  echo "changed=$(node -e \"const s=require('./sync-summary.json');process.stdout.write(String(s.changed))\")" >> "$GITHUB_OUTPUT"
+                  echo "added=$(node -e \"const s=require('./sync-summary.json');process.stdout.write(String(s.added.length))\")" >> "$GITHUB_OUTPUT"
+                  echo "updated=$(node -e \"const s=require('./sync-summary.json');process.stdout.write(String(s.updated.length))\")" >> "$GITHUB_OUTPUT"
+                  echo "removed=$(node -e \"const s=require('./sync-summary.json');process.stdout.write(String(s.removedUpstream.length))\")" >> "$GITHUB_OUTPUT"
+
+            - name: Run checks
+              if: steps.sync.outputs.changed == 'true'
+              run: |
+                  pnpm run check
+                  pnpm run test
+
+            - name: Build PR body
+              if: steps.sync.outputs.changed == 'true'
+              id: body
+              run: |
+                  node <<'NODE' > pr-body.md
+                  const fs = require('fs');
+                  const s = JSON.parse(fs.readFileSync('sync-summary.json', 'utf8'));
+                  const fmt = (arr) => arr.length ? arr.map((x) => `- \`${x}\``).join('\n') : '- Ninguna';
+                  const body = [
+                    '## Sincronización automática de skills desde upstream',
+                    '',
+                    `- Fuente: \`${s.source?.repository || 'Jeffallan/claude-skills'}\` @ \`${s.source?.ref || 'main'}\` (${s.source?.path || 'plugin/skills'})`,
+                    `- SHA upstream: \`${s.upstreamSha}\``,
+                    '',
+                    '### Skills nuevas (asignar categoría)',
+                    fmt(s.added),
+                    '',
+                    '### Skills actualizadas',
+                    fmt(s.updated),
+                    '',
+                    '### Skills eliminadas en upstream (no eliminadas localmente)',
+                    fmt(s.removedUpstream),
+                    '',
+                    '### Skills ignoradas por sync.ignore',
+                    fmt(s.ignored),
+                    '',
+                    'Revisa la categoría `Por asignar` en `skills.config.json` antes de fusionar.',
+                  ].join('\n');
+                  fs.writeFileSync('pr-body.md', body);
+                  NODE
+                  cat pr-body.md
+
+            - name: Create or update pull request
+              if: steps.sync.outputs.changed == 'true'
+              uses: peter-evans/create-pull-request@v6
+              with:
+                  token: ${{ github.token }}
+                  branch: sync-skills
+                  base: main
+                  title: "chore(sync): sincronizar skills desde upstream"
+                  body-path: pr-body.md
+                  commit-message: "chore(sync): sincronizar skills desde upstream"
+                  add-paths: |
+                      skills/**
+                      skills.config.json
+                      manifest.json
+                      .github/upstream-sync-state.json
