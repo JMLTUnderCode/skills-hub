@@ -76,7 +76,7 @@ pnpm run test
 Notas:
 
 - No edites `manifest.json` manualmente.
-- Si tu cambio afecta `skills/**` o `skills.config.json`, regenera el manifest antes de commitear en la rama/PR. El workflow `Manifest guard` en `main` es una red de seguridad: si detecta disparidad, regenera y commitea `manifest.json`; si está en línea, no hace nada.
+- Si tu cambio afecta `skills/**` o `skills.config.json`, regenera el manifest antes de commitear en la rama/PR. El workflow `Manifest guard` corre en PR hacia `main` como check bloqueante: si detecta disparidad, falla y no realiza commits automáticos.
 - `check:manifest` y el test de paridad del repositorio ignoran el campo `generated`; validan que `manifest.json` esté en línea con `skills/` y `skills.config.json`.
 - `biome.json` excluye `skills/` y `manifest.json`; los cambios en skills deben revisarse por contenido y consistencia.
 

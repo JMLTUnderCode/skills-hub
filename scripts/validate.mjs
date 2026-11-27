@@ -222,20 +222,21 @@ async function main() {
             },
         },
         {
-            label: 'Fase 2: Validación y check con Biome',
+            label: 'Fase 2: Build de manifest',
             run: async () => {
-                const build = await runCommand('pnpm', ['run', 'build:manifest']);
-                if (build.code !== 0) return { ok: false, ...build };
-                const check = await runCommand('pnpm', ['run', 'check']);
-                return {
-                    ok: check.code === 0,
-                    stdout: [build.stdout, check.stdout].filter(Boolean).join('\n'),
-                    stderr: [build.stderr, check.stderr].filter(Boolean).join('\n'),
-                };
+                const result = await runCommand('pnpm', ['run', 'build:manifest']);
+                return { ok: result.code === 0, ...result };
             },
         },
         {
-            label: 'Fase 3: Tests',
+            label: 'Fase 3: Validación y check con Biome',
+            run: async () => {
+                const result = await runCommand('pnpm', ['run', 'check']);
+                return { ok: result.code === 0, ...result };
+            },
+        },
+        {
+            label: 'Fase 4: Tests',
             run: async () => {
                 const result = await runCommand('pnpm', ['run', 'test']);
                 return { ok: result.code === 0, ...result, showTests: true };
@@ -249,7 +250,7 @@ async function main() {
             process.exitCode = 1;
             return;
         }
-        if (phase.label.startsWith('Fase 3') && result.stdout) {
+        if (phase.label.startsWith('Fase 4') && result.stdout) {
             const block = extractTestBlock(result.stdout);
             if (block) console.log(block);
         }

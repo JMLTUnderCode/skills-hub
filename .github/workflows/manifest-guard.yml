@@ -1,16 +1,18 @@
 name: Manifest guard
 
 on:
-    push:
+    pull_request:
         branches:
             - main
         paths:
             - "skills/**"
             - "skills.config.json"
-    workflow_dispatch:
+            - "manifest.json"
+            - "scripts/build-manifest.mjs"
+            - ".github/workflows/manifest-guard.yml"
 
 permissions:
-    contents: write
+    contents: read
 
 jobs:
     guard:
@@ -24,17 +26,5 @@ jobs:
               with:
                   node-version: "20"
 
-            - name: Regenerar manifest
-              run: node scripts/build-manifest.mjs
-
-            - name: Confirmar manifest o commitear corrección
-              run: |
-                  if git diff --quiet -- manifest.json; then
-                    echo "manifest.json en línea"
-                    exit 0
-                  fi
-                  git config user.name "github-actions[bot]"
-                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                  git add manifest.json
-                  git commit -m "chore: regenerate manifest.json"
-                  git push
+            - name: Verificar paridad del manifest
+              run: node scripts/build-manifest.mjs --check

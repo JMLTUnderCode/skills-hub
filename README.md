@@ -107,7 +107,7 @@ pnpm run validate
 
 ## CI
 
-El workflow `Manifest guard` se ejecuta en push a `main` cuando cambian `skills/**` o `skills.config.json`, y también por `workflow_dispatch`. Actúa como guardia: regenera `manifest.json`, verifica si hay diferencias y, solo si detecta disparidad, crea un commit automático `chore: regenerate manifest.json`; si ya está en línea, no hace nada. En ramas/PRs como `sync-skills`, regenera el manifest localmente con `pnpm run build:manifest` o usa `pnpm run validate` antes de commitear.
+El workflow `Manifest guard` se ejecuta en `pull_request` hacia `main` cuando cambian `skills/**`, `skills.config.json`, `manifest.json`, el generador o el propio workflow. Actúa como check bloqueante: ejecuta `node scripts/build-manifest.mjs --check` y falla si `manifest.json` no está en línea con `skills/` y `skills.config.json`. No realiza commits automáticos; la corrección se hace en la rama del PR ejecutando `pnpm run build:manifest` o `pnpm run validate` y subiendo el cambio.
 
 ## Sincronización con upstream
 
