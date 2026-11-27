@@ -37,7 +37,7 @@ jobs:
                   set -euo pipefail
                   STATE_FILE=".github/upstream-sync-state.json"
                   LAST_SHA=$(node -e "const fs=require('fs');const p='$STATE_FILE';if(!fs.existsSync(p)){process.stdout.write('');process.exit(0);}const j=JSON.parse(fs.readFileSync(p,'utf8'));process.stdout.write(j.lastSyncedSha||'');")
-                  UPSTREAM_SHA=$(gh api repos/Jeffallan/claude-skills/commits -f sha=main -f path=plugin/skills -F per_page=1 --jq '.[0].sha')
+                  UPSTREAM_SHA=$(gh api -X GET repos/Jeffallan/claude-skills/commits -f sha=main -f path=plugin/skills -F per_page=1 --jq '.[0].sha')
                   echo "last_sha=$LAST_SHA" >> "$GITHUB_OUTPUT"
                   echo "upstream_sha=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
                   if [ -n "$LAST_SHA" ] && [ "$LAST_SHA" = "$UPSTREAM_SHA" ]; then
